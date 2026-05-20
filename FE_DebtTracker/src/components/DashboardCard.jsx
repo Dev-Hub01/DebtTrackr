@@ -1,5 +1,4 @@
 const DashboardCard = ({ title, amount, color, icon }) => {
-  console.log("DashboardCard");
   return (
     <div
       style={{
