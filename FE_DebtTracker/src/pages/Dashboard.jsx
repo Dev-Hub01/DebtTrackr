@@ -4,7 +4,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-
+import API from "../services/api";
 import {
   LineChart,
   Line,
@@ -12,82 +12,214 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
+import { useEffect, useState } from "react";
+import { Box, Tab, Tabs } from "@mui/material";
+import RecentTransactions from "../components/RecentTransactions";
 
-// ✅ Dummy data
 const data = [
   { name: "Jan", amount: 4000 },
   { name: "Feb", amount: 3000 },
   { name: "Mar", amount: 5000 },
-  { name: "Apr", amount: 2000 }
+  { name: "Apr", amount: 2000 },
 ];
 
-// ✅ THIS WAS MISSING
 const Dashboard = () => {
+  const [tab, setTab] = useState("LEND");
+  const [transactions, setTransactions] = useState([]);
+  const [summary, setSummary] = useState({});
+  const handleChange = (event, newValue) => {
+    setTab(newValue);
+  };
+
+  const fetchDashboardData = async (type) => {
+    try {
+      const res = await API.get("/dashboard", {
+        params: { transactionType: type },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    fetchDashboardData(tab);
+  }, [tab]);
+
+  const cards =
+    tab === "LEND"
+      ? [
+          {
+            title: "TOTAL LEND",
+            amount: summary.totalLend || "₹0",
+            color: "linear-gradient(135deg,#22c55e,#16a34a)",
+            icon: <TrendingUpIcon />,
+          },
+          {
+            title: "TOTAL RECEIVED",
+            amount: summary.totalReceived || "₹0",
+            color: "linear-gradient(135deg,#3b82f6,#2563eb)",
+            icon: <AccountBalanceWalletIcon />,
+          },
+          {
+            title: "TOTAL PENDING",
+            amount: summary.totalPending || "₹0",
+            color: "linear-gradient(135deg,#f59e0b,#ea580c)",
+            icon: <HourglassBottomIcon />,
+          },
+        ]
+      : [
+          {
+            title: "TOTAL BORROW",
+            amount: summary.totalBorrow || "₹0",
+            color: "linear-gradient(135deg,#ef4444,#dc2626)",
+            icon: <TrendingDownIcon />,
+          },
+          {
+            title: "TOTAL PAID",
+            amount: summary.totalPaid || "₹0",
+            color: "linear-gradient(135deg,#22c55e,#16a34a)",
+            icon: <AccountBalanceWalletIcon />,
+          },
+          {
+            title: "TOTAL PENDING",
+            amount: summary.totalPending || "₹0",
+            color: "linear-gradient(135deg,#f59e0b,#ea580c)",
+            icon: <HourglassBottomIcon />,
+          },
+        ];
+
   return (
     <div>
       <h1>Dashboard</h1>
+      <Box sx={{ width: "100%", marginTop: 2 }}>
+        <Tabs
+          value={tab}
+          onChange={handleChange}
+          variant="fullWidth"
+          TabIndicatorProps={{ style: { display: "none" } }} // remove default underline
+          sx={{
+            background: "#f1f3f4",
+            borderRadius: "10px",
+            padding: "5px",
+          }}
+        >
+          <Tab
+            label="LEND"
+            value={"LEND"}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: "8px",
+              mx: 0.5,
+              minHeight: "40px",
+              "&.Mui-selected": {
+                backgroundColor: "#ffffff",
+              },
+            }}
+          />
+          <Tab
+            label="BORROW"
+            value={"BORROW"}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: "8px",
+              mx: 0.5,
+              minHeight: "40px",
+              "&.Mui-selected": {
+                backgroundColor: "#ffffff",
+              },
+            }}
+          />
+        </Tabs>
+      </Box>
+      {tab === "LEND" && (
+        <>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "20px",
+              marginTop: "20px",
+            }}
+          >
+            <DashboardCard
+              title="TOTAL LEND"
+              amount="₹25,000"
+              color="#12b76a"
+              icon={<TrendingUpIcon />}
+            />
 
-      {/* CARDS */}
+            <DashboardCard
+              title="TOTAL RECEIVED"
+              amount="₹18,000"
+              color="#155eef"
+              icon={<AccountBalanceWalletIcon />}
+            />
+
+            <DashboardCard
+              title="TOTAL PENDING"
+              amount="₹7,000"
+              color="#f80"
+              icon={<HourglassBottomIcon />}
+            />
+          </div>
+        </>
+      )}
+      {tab === "BORROW" && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "20px",
+            marginTop: "20px",
+          }}
+        >
+          <DashboardCard
+            title="TOTAL BORROW"
+            amount="₹15,000"
+            color="#DC2626"
+            icon={<TrendingDownIcon />}
+          />
+
+          <DashboardCard
+            title="TOTAL PAID"
+            amount="₹10,000"
+            color="#12b76a"
+            icon={<AccountBalanceWalletIcon />}
+          />
+
+          <DashboardCard
+            title="TOTAL PENDING"
+            amount="₹5,000"
+            color="#f80"
+            icon={<HourglassBottomIcon />}
+          />
+        </div>
+      )}
+
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "2fr 2fr",
           gap: "20px",
-          marginTop: "20px"
+          marginTop: "30px",
         }}
       >
-        <DashboardCard
-          title="TOTAL LENT"
-          amount="₹25,000"
-          color="#22C55E"
-          icon={<TrendingUpIcon />}
-        />
-        <DashboardCard
-          title="TOTAL BORROW"
-          amount="₹15,000"
-          color="#EF4444"
-          icon={<TrendingDownIcon />}
-        />
-        <DashboardCard
-          title="PENDING"
-          amount="₹8,000"
-          color="#F59E0B"
-          icon={<HourglassBottomIcon />}
-        />
-        <DashboardCard
-          title="NET BALANCE"
-          amount="₹10,000"
-          color="#3B82F6"
-          icon={<AccountBalanceWalletIcon />}
-        />
-      </div>
-
-      {/* GRAPH + TABLE */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "20px",
-          marginTop: "30px"
-        }}
-      >
-        {/* GRAPH */}
         <div
           style={{
             background: "white",
             padding: "20px",
             borderRadius: "14px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            height: "320px"
+            height: "320px",
           }}
         >
           <h3>Transaction Overview</h3>
 
           <ResponsiveContainer width="100%" height="90%">
             <LineChart data={data}>
-              <XAxis dataKey="name" stroke="#888" />
+              <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <CartesianGrid strokeDasharray="3 3" />
@@ -100,46 +232,11 @@ const Dashboard = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
-
-        {/* TABLE */}
-        <div
-          style={{
-            background: "white",
-            padding: "20px",
-            borderRadius: "14px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            height: "320px"
-          }}
-        >
-          <h3>Recent Transactions</h3>
-
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid #ddd" }}>
-                <th style={{ padding: "10px", textAlign: "left" }}>Name</th>
-                <th style={{ padding: "10px", textAlign: "left" }}>Type</th>
-                <th style={{ padding: "10px", textAlign: "left" }}>Amount</th>
-                <th style={{ padding: "10px", textAlign: "left" }}>Date</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "10px" }}>Ravi</td>
-                <td style={{ padding: "10px", color: "green" }}>LENT</td>
-                <td style={{ padding: "10px" }}>₹500</td>
-                <td style={{ padding: "10px" }}>12 Apr</td>
-              </tr>
-
-              <tr>
-                <td style={{ padding: "10px" }}>Anita</td>
-                <td style={{ padding: "10px", color: "red" }}>BORROW</td>
-                <td style={{ padding: "10px" }}>₹1000</td>
-                <td style={{ padding: "10px" }}>10 Apr</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        {transactions.length > 0 && (
+          <>
+            <RecentTransactions transactions={transactions} />
+          </>
+        )}
       </div>
     </div>
   );

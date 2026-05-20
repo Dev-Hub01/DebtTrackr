@@ -33,21 +33,47 @@ const Persons = () => {
     state: "",
     relation: "",
   });
+  const [editPerson, setEditPerson] = useState(null);
 
   const validationSchema = Yup.object({
-    name: Yup.string().trim().required("Name is required"),
+    name: Yup.string()
+      .trim()
+      .matches(/^[A-Za-z ]+$/, "Only alphabets are allowed")
+      .required("Name is required")
+      .test(
+        "not-only-spaces",
+        "Name cannot be empty",
+        (value) => value && value.trim().length > 0
+      ),
 
     contactNumber: Yup.string()
       .matches(/^(?:\+91)?[6-9]\d{9}$/, "Enter valid phone number")
-      .required("Phone is required"),
+      .required("Phone is required")
+      .max(10),
 
     email: Yup.string()
       .email("Enter valid email")
       .required("Email is required"),
 
-    city: Yup.string().trim().required("City is required"),
+    city: Yup.string()
+      .matches(/^[A-Za-z ]+$/, "Only alphabets are allowed")
+      .trim()
+      .required("City is required")
+      .test(
+        "not-only-spaces",
+        "Name cannot be empty",
+        (value) => value && value.trim().length > 0
+      ),
 
-    state: Yup.string().trim().required("State is required"),
+    state: Yup.string()
+      .matches(/^[A-Za-z ]+$/, "Only alphabets are allowed")
+      .trim()
+      .required("State is required")
+      .test(
+        "not-only-spaces",
+        "Name cannot be empty",
+        (value) => value && value.trim().length > 0
+      ),
 
     relation: Yup.string().required("Relation is required"),
   });
@@ -64,9 +90,15 @@ const Persons = () => {
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
-        await API.post("/persons/create", values);
+        if (editPerson) {
+          await API.put("/persons/update", values);
+        } else {
+          await API.post("/persons/create", values);
+        }
+
         fetchPersons();
         resetForm();
+        setEditPerson(null);
         setOpen(false);
       } catch (err) {
         console.error(err);
@@ -105,10 +137,26 @@ const Persons = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setEditPerson(null);
     formik.resetForm();
   };
   const handleAdd = () => {
     setOpen(true);
+  };
+
+  const handleEdit = (person) => {
+    setEditPerson(person);
+    setOpen(true);
+
+    formik.setValues({
+      id: person.id || "",
+      name: person.name || "",
+      contactNumber: person.contactNumber || "",
+      email: person.email || "",
+      city: person.city || "",
+      state: person.state || "",
+      relation: person.relation || "",
+    });
   };
   return (
     <Box sx={{ p: 3, background: "#f5f7fb", minHeight: "100vh" }}>
@@ -136,10 +184,11 @@ const Persons = () => {
           persons={filteredPersons}
           filters={filters}
           onFilterChange={handleFilterChange}
+          onEdit={handleEdit}
         />
       )}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Add Person</DialogTitle>
+        <DialogTitle>{editPerson ? "Edit Person" : "Add Person"}</DialogTitle>
 
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
