@@ -10,7 +10,7 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [editData, setEditData] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false);
 
   const fetchTransactions = async () => {
     const res = await API.get("/transaction");
