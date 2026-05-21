@@ -21,6 +21,7 @@ const RecentTransactions = ({ transactions = [] }) => {
             <th style={thStyle}>Type</th>
             <th style={thStyle}>Amount</th>
             <th style={thStyle}>Date</th>
+            <th style={thStyle}>Status</th>
           </tr>
         </thead>
 
@@ -34,7 +35,7 @@ const RecentTransactions = ({ transactions = [] }) => {
           ) : (
             transactions.map((t, index) => (
               <tr key={index} style={{ borderBottom: "1px solid #f1f1f1" }}>
-                <td style={tdStyle}>{t.name}</td>
+                <td style={tdStyle}>{t.personName}</td>
 
                 <td
                   style={{
@@ -53,7 +54,15 @@ const RecentTransactions = ({ transactions = [] }) => {
 
                 <td style={tdStyle}>₹{t.amount}</td>
 
-                <td style={tdStyle}>{t.date}</td>
+                <td style={tdStyle}>{t.transactionDate}</td>
+                <td
+                  style={{
+                    tdStyle,
+                    color: t.status === "COMPLETED" ? "green" : "red",
+                  }}
+                >
+                  {t.status}
+                </td>
               </tr>
             ))
           )}

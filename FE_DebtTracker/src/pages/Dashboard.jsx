@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [tab, setTab] = useState("LEND");
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({});
+  const [chartData, setChartData] = useState([]);
   const handleChange = (event, newValue) => {
     setTab(newValue);
   };
@@ -36,8 +37,11 @@ const Dashboard = () => {
   const fetchDashboardData = async (type) => {
     try {
       const res = await API.get("/dashboard", {
-        params: { transactionType: type },
+        params: { type: type },
       });
+      setSummary(res.data.summary[0]);
+      setTransactions(res.data.recentTransactions || []);
+      setChartData(res.data.summary || []);
     } catch (err) {
       console.error(err);
     }
@@ -45,50 +49,10 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData(tab);
   }, [tab]);
-
-  const cards =
-    tab === "LEND"
-      ? [
-          {
-            title: "TOTAL LEND",
-            amount: summary.totalLend || "₹0",
-            color: "linear-gradient(135deg,#22c55e,#16a34a)",
-            icon: <TrendingUpIcon />,
-          },
-          {
-            title: "TOTAL RECEIVED",
-            amount: summary.totalReceived || "₹0",
-            color: "linear-gradient(135deg,#3b82f6,#2563eb)",
-            icon: <AccountBalanceWalletIcon />,
-          },
-          {
-            title: "TOTAL PENDING",
-            amount: summary.totalPending || "₹0",
-            color: "linear-gradient(135deg,#f59e0b,#ea580c)",
-            icon: <HourglassBottomIcon />,
-          },
-        ]
-      : [
-          {
-            title: "TOTAL BORROW",
-            amount: summary.totalBorrow || "₹0",
-            color: "linear-gradient(135deg,#ef4444,#dc2626)",
-            icon: <TrendingDownIcon />,
-          },
-          {
-            title: "TOTAL PAID",
-            amount: summary.totalPaid || "₹0",
-            color: "linear-gradient(135deg,#22c55e,#16a34a)",
-            icon: <AccountBalanceWalletIcon />,
-          },
-          {
-            title: "TOTAL PENDING",
-            amount: summary.totalPending || "₹0",
-            color: "linear-gradient(135deg,#f59e0b,#ea580c)",
-            icon: <HourglassBottomIcon />,
-          },
-        ];
-
+  const formattedChartData = chartData.map((item) => ({
+    name: item.month,
+    amount: item.monthlyAmount,
+  }));
   return (
     <div>
       <h1>Dashboard</h1>
@@ -146,21 +110,21 @@ const Dashboard = () => {
           >
             <DashboardCard
               title="TOTAL LEND"
-              amount="₹25,000"
+              amount={summary?.totalAmount || 0}
               color="#12b76a"
               icon={<TrendingUpIcon />}
             />
 
             <DashboardCard
               title="TOTAL RECEIVED"
-              amount="₹18,000"
+              amount={summary?.settledAmount || 0}
               color="#155eef"
               icon={<AccountBalanceWalletIcon />}
             />
 
             <DashboardCard
               title="TOTAL PENDING"
-              amount="₹7,000"
+              amount={summary?.totalPending || 0}
               color="#f80"
               icon={<HourglassBottomIcon />}
             />
@@ -178,21 +142,21 @@ const Dashboard = () => {
         >
           <DashboardCard
             title="TOTAL BORROW"
-            amount="₹15,000"
+            amount={summary?.totalAmount || 0}
             color="#DC2626"
             icon={<TrendingDownIcon />}
           />
 
           <DashboardCard
             title="TOTAL PAID"
-            amount="₹10,000"
+            amount={summary?.settledAmount || 0}
             color="#12b76a"
             icon={<AccountBalanceWalletIcon />}
           />
 
           <DashboardCard
             title="TOTAL PENDING"
-            amount="₹5,000"
+            amount={summary?.totalPending || 0}
             color="#f80"
             icon={<HourglassBottomIcon />}
           />
@@ -218,7 +182,7 @@ const Dashboard = () => {
           <h3>Transaction Overview</h3>
 
           <ResponsiveContainer width="100%" height="90%">
-            <LineChart data={data}>
+            <LineChart data={formattedChartData}>
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
