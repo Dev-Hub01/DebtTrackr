@@ -18,13 +18,6 @@ import { useEffect, useState } from "react";
 import { Box, Tab, Tabs } from "@mui/material";
 import RecentTransactions from "../components/RecentTransactions";
 
-const data = [
-  { name: "Jan", amount: 4000 },
-  { name: "Feb", amount: 3000 },
-  { name: "Mar", amount: 5000 },
-  { name: "Apr", amount: 2000 },
-];
-
 const Dashboard = () => {
   const [tab, setTab] = useState("LEND");
   const [transactions, setTransactions] = useState([]);
