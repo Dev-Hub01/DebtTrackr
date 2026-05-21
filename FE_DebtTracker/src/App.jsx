@@ -1,4 +1,3 @@
-
 import Transactions from "./pages/Transactions";
 import Email from "./pages/Email";
 import Reports from "./pages/Reports";
@@ -7,14 +6,25 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Persons from "./pages/Persons";
 import Dashboard from "./pages/Dashboard";
 import Payments from "./pages/Payments";
+import "./App.css";
 function App() {
   return (
     <BrowserRouter>
-      <div style={{ display: "flex" }}>
-        
+      <div
+        style={{
+          display: "flex",
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
         <Sidebar />
-
-        <div style={{ flex: 1, padding: "20px" }}>
+        <div
+          style={{
+            flex: 1,
+            padding: "20px",
+            overflowY: "auto",
+          }}
+        >
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/persons" element={<Persons />} />
@@ -24,10 +34,8 @@ function App() {
             <Route path="/reports" element={<Reports />} />
           </Routes>
         </div>
-
       </div>
     </BrowserRouter>
   );
 }
-
 export default App;
